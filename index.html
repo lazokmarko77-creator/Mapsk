@@ -19,13 +19,13 @@
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
- 
+
 /* LOADING */
 #loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px;transition:opacity .4s}
 #loading.hide{opacity:0;pointer-events:none}
 .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
- 
+
 /* MODAL */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:8000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
 .overlay.open{opacity:1;pointer-events:all}
@@ -51,12 +51,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .lpane{display:none}.lpane.active{display:block}
 .ferr{font-size:.72rem;color:var(--danger);margin-top:-8px;margin-bottom:10px;display:none}
 .ferr.show{display:block}
- 
+
 /* HEADER */
 header{height:54px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:10px;z-index:1000;flex-shrink:0}
 .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;letter-spacing:-.4px;white-space:nowrap;user-select:none}
 .logo span{color:var(--accent)}
- 
+
 /* SEARCH */
 .srch-wrap{flex:1;max-width:360px;position:relative}
 .srch-wrap input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:7px 11px 7px 34px;color:var(--text);font-family:inherit;font-size:.83rem;outline:none;transition:border-color .2s}
@@ -70,14 +70,14 @@ header{height:54px;background:var(--surface);border-bottom:1px solid var(--borde
 .srch-item:last-child{border-bottom:none}
 .srch-item:hover,.srch-item.focused{background:rgba(45,164,78,.12);color:var(--accent)}
 .srch-item b{color:var(--text)}
- 
+
 .hbtns{margin-left:auto;display:flex;align-items:center;gap:7px}
 .hbtn{display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:inherit;font-size:.76rem;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
 .hbtn:hover{border-color:var(--accent)}
 .hbtn.active{background:var(--accent);border-color:var(--accent);color:#fff}
 .hbtn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .hbtn.primary:hover{background:var(--accent2)}
- 
+
 /* LANG DROPDOWN */
 .ldrop{position:relative}
 .lsel{display:flex;align-items:center;gap:4px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:.76rem;font-weight:600;transition:border-color .15s;user-select:none}
@@ -87,15 +87,15 @@ header{height:54px;background:var(--surface);border-bottom:1px solid var(--borde
 .lopt{padding:6px 10px;border-radius:5px;font-size:.78rem;font-weight:500;cursor:pointer;color:var(--text);transition:background .1s}
 .lopt:hover{background:rgba(45,164,78,.15);color:var(--accent)}
 .lopt.active{color:var(--accent);font-weight:700}
- 
+
 /* USER CHIP */
 .uchip{display:flex;align-items:center;gap:7px;padding:4px 10px 4px 4px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;cursor:pointer;transition:border-color .15s}
 .uchip:hover{border-color:var(--accent)}
 .uavt{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--blue));display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;color:#fff;flex-shrink:0}
- 
+
 /* MAIN */
 .main{flex:1;display:flex;overflow:hidden;position:relative}
- 
+
 /* SIDEBAR */
 .sidebar{width:284px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:500;flex-shrink:0;transition:width .25s,transform .25s;overflow:hidden}
 .sidebar.collapsed{width:0}
@@ -109,7 +109,7 @@ header{height:54px;background:var(--surface);border-bottom:1px solid var(--borde
 .sec-ttl{font-family:'Syne',sans-serif;font-size:.66rem;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--muted);margin:12px 0 7px}
 .sec-ttl:first-child{margin-top:2px}
 .tpane{display:none}.tpane.active{display:block}
- 
+
 /* LAYER ITEM */
 .litem{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius);background:var(--surface2);border:1px solid var(--border);margin-bottom:6px;cursor:pointer;transition:all .15s;user-select:none}
 .litem:hover{border-color:var(--accent)}
@@ -122,7 +122,7 @@ header{height:54px;background:var(--surface);border-bottom:1px solid var(--borde
 .tog.on{background:var(--accent)}
 .tog::after{content:'';position:absolute;left:2px;top:2px;width:13px;height:13px;border-radius:50%;background:#fff;transition:transform .2s}
 .tog.on::after{transform:translateX(15px)}
- 
+
 /* TRANSPORT ITEMS */
 .titem{display:flex;align-items:center;gap:8px;padding:8px 9px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:5px;font-size:.78rem;cursor:pointer;transition:border-color .15s}
 .titem:hover{border-color:var(--accent)}
@@ -132,7 +132,7 @@ header{height:54px;background:var(--surface);border-bottom:1px solid var(--borde
 .troute{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tsub{font-size:.67rem;color:var(--muted);margin-top:1px}
 .tdep{font-weight:700;color:var(--accent);font-size:.82rem;flex-shrink:0}
- 
+
 /* WEATHER */
 .w-now{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px}
 .w-ico-big{font-size:2.6rem;line-height:1}
@@ -148,27 +148,27 @@ header{height:54px;background:var(--surface);border-bottom:1px solid var(--borde
 .w-h-ico{font-size:.9rem;margin:2px 0}
 .w-h-t{font-weight:600;font-size:.72rem}
 .w-h-p{color:var(--blue);font-size:.6rem}
- 
+
 /* MAP */
 #map{position:absolute;inset:0;background:var(--bg)}
 .map-wrap{flex:1;position:relative;min-height:0;overflow:hidden}
- 
+
 /* MAP TOOLBAR */
 .mtbar{position:absolute;top:12px;right:12px;z-index:800;display:flex;flex-direction:column;gap:5px}
 .mtbtn{width:34px;height:34px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;font-weight:700;color:var(--text);transition:all .15s;user-select:none}
 .mtbtn:hover{border-color:var(--accent);color:var(--accent)}
 .mtbtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
- 
+
 /* STATUS BAR */
 .sbar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:4px 14px;font-size:.7rem;color:var(--muted);z-index:800;pointer-events:none;white-space:nowrap;max-width:60vw;overflow:hidden;text-overflow:ellipsis}
 .sbar b{color:var(--text)}
- 
+
 /* WFS LOADER */
 .wfsbar{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--accent);border-radius:20px;padding:4px 14px;font-size:.7rem;color:var(--accent);z-index:900;display:none;align-items:center;gap:7px;pointer-events:none}
 .wfsbar.show{display:flex}
 .wdot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
- 
+
 /* RIGHT PANEL */
 .rpanel{width:0;background:var(--surface);border-left:1px solid var(--border);overflow:hidden;transition:width .28s;flex-shrink:0;z-index:500}
 .rpanel.open{width:300px}
@@ -179,7 +179,7 @@ header{height:54px;background:var(--surface);border-bottom:1px solid var(--borde
 .rptitle{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700}
 .closebtn{width:24px;height:24px;border-radius:5px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;transition:all .15s;flex-shrink:0}
 .closebtn:hover{color:var(--text);border-color:var(--accent)}
- 
+
 /* INFO CARDS */
 .icard{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:9px}
 .icttl{font-family:'Syne',sans-serif;font-size:.76rem;font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:5px}
@@ -192,10 +192,10 @@ header{height:54px;background:var(--surface);border-bottom:1px solid var(--borde
 .bb{background:rgba(47,129,247,.15);color:#58a6ff}
 .by{background:rgba(210,153,34,.15);color:#d29922}
 .br{background:rgba(218,54,51,.15);color:#f85149}
- 
+
 /* PARCEL PREVIEW SVG */
 .pprev{width:100%;height:90px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:11px;display:flex;align-items:center;justify-content:center;overflow:hidden}
- 
+
 /* AI PANEL */
 .aipanel{background:var(--surface2);border:1px solid var(--border);border-radius:10px;margin-bottom:9px;overflow:hidden}
 .aihdr{display:flex;align-items:center;gap:7px;padding:10px 12px;cursor:pointer;transition:background .15s;user-select:none}
@@ -212,32 +212,32 @@ header{height:54px;background:var(--surface);border-bottom:1px solid var(--borde
 .aibtn{width:100%;padding:7px;border-radius:6px;border:1px solid rgba(137,87,229,.3);background:rgba(137,87,229,.1);color:#c4b0ff;font-family:inherit;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .2s}
 .aibtn:hover{border-color:rgba(137,87,229,.5);background:rgba(137,87,229,.2)}
 .aibtn:disabled{opacity:.4;cursor:not-allowed}
- 
+
 /* ACTION ROW */
 .actrow{display:flex;gap:6px;margin-top:4px}
 .actrow .hbtn{flex:1;justify-content:center;font-size:.7rem;padding:6px 5px}
- 
+
 /* AREA RESULT */
 .area-res{background:rgba(45,164,78,.1);border:1px solid rgba(45,164,78,.3);border-radius:var(--radius);padding:9px 11px;margin-top:7px;font-size:.8rem;display:none}
 .area-res b{color:var(--accent)}
- 
+
 /* NOTIFICATIONS */
 .notif{position:fixed;top:62px;right:12px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius);padding:10px 13px;font-size:.78rem;z-index:7000;max-width:240px;transform:translateX(280px);transition:transform .3s;pointer-events:none}
 .notif.show{transform:translateX(0)}
 .ntitle{font-weight:600;margin-bottom:2px}
 .nbody{color:var(--muted);font-size:.72rem}
- 
+
 /* PDF TOAST */
 .pdf-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface);border:1px solid var(--accent);border-radius:10px;padding:11px 18px;font-size:.8rem;z-index:9000;display:flex;align-items:center;gap:9px;transition:transform .3s;min-width:200px;box-shadow:0 8px 28px rgba(0,0,0,.5)}
 .pdf-toast.show{transform:translateX(-50%) translateY(0)}
 .pdf-prog{flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
 .pdf-fill{height:100%;background:var(--accent);border-radius:2px;width:0;transition:width .4s}
- 
+
 /* LIVE/DEMO BADGE */
 .src-live{background:rgba(45,164,78,.18);color:#3fb950;font-size:.6rem;padding:1px 5px;border-radius:4px;font-weight:700;margin-left:3px}
 .src-demo{background:rgba(125,133,144,.18);color:var(--muted);font-size:.6rem;padding:1px 5px;border-radius:4px;font-weight:700;margin-left:3px}
 .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);margin-right:4px;animation:pulse 2s infinite}
- 
+
 /* LEAFLET OVERRIDES */
 .leaflet-container{background:#0d1117!important}
 .leaflet-control-zoom{display:none!important}
@@ -247,11 +247,11 @@ header{height:54px;background:var(--surface);border-bottom:1px solid var(--borde
 .leaflet-popup-close-button{color:var(--muted)!important;font-size:16px!important;padding:5px!important}
 .leaflet-popup-content{font-size:.8rem;line-height:1.5;margin:10px 14px!important}
 .mtooltip{background:var(--surface);border:1px solid var(--accent);color:var(--text);padding:4px 10px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.4)}
- 
+
 /* SB TOGGLE */
 .sbtog{width:26px;height:26px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.8rem;color:var(--muted);flex-shrink:0;transition:all .15s}
 .sbtog:hover{border-color:var(--accent);color:var(--text)}
- 
+
 /* RESPONSIVE */
 @media(max-width:768px){
   .sidebar{position:fixed;left:0;top:54px;bottom:0;width:270px!important;z-index:700;transform:translateX(-100%)}
@@ -267,20 +267,20 @@ header{height:54px;background:var(--surface);border-bottom:1px solid var(--borde
 </style>
 </head>
 <body>
- 
+
 <!-- PDF Toast -->
 <div class="pdf-toast" id="pdfToast">
   <span>📄</span><span id="pdfMsg">Generujem PDF…</span>
   <div class="pdf-prog"><div class="pdf-fill" id="pdfFill"></div></div>
 </div>
- 
+
 <!-- Loading -->
 <div id="loading">
   <div style="font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800">Map<span style="color:var(--accent)">SK</span></div>
   <div class="spinner"></div>
   <div style="color:var(--muted);font-size:.8rem" id="loadtxt">Inicializujem mapu…</div>
 </div>
- 
+
 <!-- Login Modal -->
 <div class="overlay" id="loginModal">
   <div class="modal">
@@ -308,10 +308,10 @@ header{height:54px;background:var(--surface);border-bottom:1px solid var(--borde
     </div>
   </div>
 </div>
- 
+
 <!-- Notification -->
 <div class="notif" id="notif"><div class="ntitle" id="ntitle"></div><div class="nbody" id="nbody"></div></div>
- 
+
 <!-- Header -->
 <header>
   <div class="logo">Map<span>SK</span></div>
@@ -342,7 +342,7 @@ header{height:54px;background:var(--surface);border-bottom:1px solid var(--borde
     </div>
   </div>
 </header>
- 
+
 <!-- Main -->
 <div class="main">
   <!-- Sidebar -->
@@ -353,7 +353,7 @@ header{height:54px;background:var(--surface);border-bottom:1px solid var(--borde
       <div class="stab" onclick="switchTab('transport',this)">Doprava</div>
     </div>
     <div class="scontent">
- 
+
       <!-- LAYERS TAB -->
       <div class="tpane active" id="tab-layers">
         <div class="sec-ttl">Základné mapy</div>
@@ -367,7 +367,7 @@ header{height:54px;background:var(--surface);border-bottom:1px solid var(--borde
           <div class="linfo"><div class="lname">Ortofoto</div><div class="ldesc">Letecké snímky SR</div></div>
           <div class="tog" id="tog-sat"></div>
         </div>
- 
+
         <div class="sec-ttl">Dátové vrstvy</div>
         <div class="litem" id="li-cad" onclick="togLayer('cad',this)">
           <div class="lic" style="background:rgba(210,153,34,.1)">🏠</div>
@@ -394,14 +394,14 @@ header{height:54px;background:var(--surface);border-bottom:1px solid var(--borde
           <div class="linfo"><div class="lname">Autobusové zastávky</div><div class="ldesc">OSM Overpass <span class="src-live">LIVE</span></div></div>
           <div class="tog" id="tog-bus"></div>
         </div>
- 
+
         <div class="sec-ttl" style="margin-top:14px">Kataster – klik na mapu</div>
         <div style="font-size:.72rem;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 11px;line-height:1.5">
           Zapni vrstvu <b style="color:var(--text)">Kataster</b> a klikni na parcelu pre zobrazenie dát cez proxy.<br>
           <span style="color:var(--accent)">Vlastník</span> vyžaduje ESKN prístup.
         </div>
       </div>
- 
+
       <!-- WEATHER TAB -->
       <div class="tpane" id="tab-weather">
         <div class="sec-ttl"><span class="live-dot"></span>Aktuálne počasie · Open-Meteo</div>
@@ -409,7 +409,7 @@ header{height:54px;background:var(--surface);border-bottom:1px solid var(--borde
         <div class="sec-ttl" style="margin-top:10px">Hodinová predpoveď</div>
         <div id="hourly"><div style="color:var(--muted);font-size:.74rem;padding:5px 0">Klikni na mapu…</div></div>
       </div>
- 
+
       <!-- TRANSPORT TAB -->
       <div class="tpane" id="tab-transport">
         <div class="sec-ttl"><span class="live-dot"></span>Vlaky + Letiská v okolí</div>
@@ -421,10 +421,10 @@ header{height:54px;background:var(--surface);border-bottom:1px solid var(--borde
           <div class="irow"><span class="ilbl">Klikni na zastávku</span><span class="ival" style="color:var(--accent)">→ priletí na mapu</span></div>
         </div>
       </div>
- 
+
     </div>
   </div>
- 
+
   <!-- Map -->
   <div class="map-wrap" id="mapwrap">
     <div class="wfsbar" id="wfsbar"><div class="wdot"></div><span>ZBGIS WFS načítavam…</span></div>
@@ -436,7 +436,7 @@ header{height:54px;background:var(--surface);border-bottom:1px solid var(--borde
     </div>
     <div class="sbar" id="sbar"><b>Klikni na parcelu</b> pre informácie o nehnuteľnosti</div>
   </div>
- 
+
   <!-- Right Panel -->
   <div class="rpanel" id="rpanel">
     <div class="rpinner">
@@ -499,7 +499,7 @@ header{height:54px;background:var(--surface);border-bottom:1px solid var(--borde
     </div>
   </div>
 </div>
- 
+
 <script>
 // ═══════════════════════════════════════════════════
 // CONFIG
@@ -517,7 +517,7 @@ let aiOpen = false;
 let sidebarOpen = true;
 // Kataster mode: only show parcel info when cad layer is ON
 let cadActive = false;
- 
+
 // ═══════════════════════════════════════════════════
 // MAP INIT
 // ═══════════════════════════════════════════════════
@@ -528,36 +528,36 @@ const map = L.map('map',{
   maxBounds:SK, maxBoundsViscosity:1.0, minZoom:7,
   doubleClickZoom:false
 });
- 
+
 const osmL = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
 const satL = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19});
 const cadL = L.tileLayer.wms('https://zbgis.skgeodesy.sk/mkzbgis/sk/kataster/wms',{
   layers:'KN_VKM',format:'image/png',transparent:true,version:'1.3.0',opacity:0.65,
   errorTileUrl:'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 });
- 
+
 // SVP Flood WMS – Q50/Q100/Q1000
 const floodL = L.tileLayer.wms('https://mpt.svp.sk/server/services/inspire/INSPIRE_MPO/MapServer/WMSServer',{
   layers:'0,1,2',format:'image/png',transparent:true,version:'1.3.0',opacity:0.55,
   errorTileUrl:'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 });
- 
+
 // ŠOPSR Nature WMS
 const natureL = L.tileLayer.wms('https://gis.sopsr.sk/mapservices/mapservice/wms',{
   layers:'NationalParks,CHKO',format:'image/png',transparent:true,version:'1.3.0',opacity:0.45,
   errorTileUrl:'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 });
- 
+
 // Transport layer groups (populated by Overpass)
 const trainL = L.layerGroup();
 const busL   = L.layerGroup();
- 
+
 const trainIcon = L.divIcon({className:'',html:'<div style="background:#8957e5;border:2px solid #fff;border-radius:50%;width:11px;height:11px;box-shadow:0 1px 4px rgba(0,0,0,.6)"></div>',iconSize:[11,11],iconAnchor:[5,5]});
 const busIcon   = L.divIcon({className:'',html:'<div style="background:#d29922;border:2px solid #fff;border-radius:3px;width:9px;height:9px;box-shadow:0 1px 4px rgba(0,0,0,.6)"></div>',iconSize:[9,9],iconAnchor:[4,4]});
 const airIcon   = L.divIcon({className:'',html:'<div style="background:#2f81f7;border:2px solid #fff;border-radius:50%;width:15px;height:15px;display:flex;align-items:center;justify-content:center;font-size:8px;box-shadow:0 1px 4px rgba(0,0,0,.6)">✈</div>',iconSize:[15,15],iconAnchor:[7,7]});
- 
+
 const layerMap = {cad:cadL, flood:floodL, nature:natureL, train:trainL, bus:busL};
- 
+
 // ═══════════════════════════════════════════════════
 // MAP EVENTS
 // ═══════════════════════════════════════════════════
@@ -568,6 +568,7 @@ map.on('click', e => {
   lastLL = e.latlng;
   // Always fetch weather + transport on click
   fetchWeather(e.latlng.lat, e.latlng.lng);
+  loadBusesNear(e.latlng.lat, e.latlng.lng);
   renderTransport(e.latlng.lat, e.latlng.lng);
   // Only fetch parcel info if cadastre layer is active
   if(cadActive){
@@ -578,7 +579,7 @@ map.on('click', e => {
   }
 });
 map.on('dblclick', e => { if(tool==='area') finishArea(); });
- 
+
 // ═══════════════════════════════════════════════════
 // LAYER TOGGLE
 // ═══════════════════════════════════════════════════
@@ -613,21 +614,21 @@ function togLayer(id, el){
     showNotif('Vrstva',nm+' aktivovaná');
   }
 }
- 
+
 // ═══════════════════════════════════════════════════
 // SEARCH WITH AUTOCOMPLETE
 // ═══════════════════════════════════════════════════
 let srchTimer = null, srchFocusIdx = -1;
 const srchInp = document.getElementById('srch');
 const srchDrop = document.getElementById('srchDrop');
- 
+
 srchInp.addEventListener('input', () => {
   clearTimeout(srchTimer);
   const q = srchInp.value.trim();
   if(q.length < 2){ srchDrop.classList.remove('open'); srchDrop.innerHTML=''; return; }
   srchTimer = setTimeout(()=> doAutocomplete(q), 280);
 });
- 
+
 srchInp.addEventListener('keydown', e => {
   const items = srchDrop.querySelectorAll('.srch-item');
   if(e.key==='ArrowDown'){ e.preventDefault(); srchFocusIdx=Math.min(srchFocusIdx+1,items.length-1); highlightAC(items); }
@@ -639,18 +640,18 @@ srchInp.addEventListener('keydown', e => {
   }
   else if(e.key==='Escape'){ srchDrop.classList.remove('open'); }
 });
- 
+
 document.addEventListener('click', e=>{
   if(!srchInp.contains(e.target)&&!srchDrop.contains(e.target)){
     srchDrop.classList.remove('open');
   }
 });
- 
+
 function highlightAC(items){
   items.forEach((it,i)=> it.classList.toggle('focused', i===srchFocusIdx));
   if(items[srchFocusIdx]) items[srchFocusIdx].scrollIntoView({block:'nearest'});
 }
- 
+
 async function doAutocomplete(q){
   try{
     const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q+', Slovakia')}&limit=6&addressdetails=1&accept-language=sk`);
@@ -677,7 +678,7 @@ async function doAutocomplete(q){
     srchDrop.classList.add('open');
   }catch{}
 }
- 
+
 function doSearch(q){
   if(!q) return;
   fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q+', Slovakia')}&limit=1`)
@@ -686,7 +687,7 @@ function doSearch(q){
       else showNotif('?','Nenájdené');
     }).catch(()=>{});
 }
- 
+
 // ═══════════════════════════════════════════════════
 // WFS PARCEL (via proxy)
 // ═══════════════════════════════════════════════════
@@ -704,7 +705,7 @@ async function fetchParcelWFS(latlng){
   bar.classList.remove('show');
   if(feat) renderWFS(feat,latlng); else renderDemo(latlng);
 }
- 
+
 function renderWFS(feat,latlng){
   const pr=feat.properties||{}, geom=feat.geometry;
   if(highlightL){map.removeLayer(highlightL);highlightL=null;}
@@ -722,7 +723,7 @@ function renderWFS(feat,latlng){
     lv:pr.LV||'–', owner:'– (vyžaduje ESKN)', addr:'–', share:'–', ot:'unknown', isLive:true
   },latlng);
 }
- 
+
 async function renderDemo(latlng){
   let ku='Slovensko', addr='–';
   try{
@@ -745,7 +746,7 @@ async function renderDemo(latlng){
     owner:owners[oi]==='s.r.o.'?ku+' Agro s.r.o.':'Fyzická osoba',
     addr,share:'1/1',ot:ots[oi],isLive:false},latlng);
 }
- 
+
 function drawFallback(latlng){
   if(highlightL){map.removeLayer(highlightL);highlightL=null;}
   const s=0.003,o=()=>(Math.random()-.5)*s*.4;
@@ -756,7 +757,7 @@ function drawFallback(latlng){
     [latlng.lat-s*.7+o(),latlng.lng+s*.5+o()]
   ],{color:'#2da44e',weight:2,fillColor:'#2da44e',fillOpacity:.12,dashArray:'5'}).addTo(map);
 }
- 
+
 function fillUI(p,latlng){
   currentParcel={...p,lat:latlng.lat.toFixed(6),lng:latlng.lng.toFixed(6)};
   document.getElementById('pi-nr').textContent=p.nr;
@@ -783,7 +784,7 @@ function fillUI(p,latlng){
   openRP();
   setSbar(`<b>${p.nr}</b> · ${p.ku}`);
 }
- 
+
 // ═══════════════════════════════════════════════════
 // WEATHER
 // ═══════════════════════════════════════════════════
@@ -824,7 +825,7 @@ async function fetchWeather(lat,lng){
     document.getElementById('wi-rain').textContent=prec+' mm';
   }catch(e){ console.warn('Weather:',e); }
 }
- 
+
 function wmoIcon(code,temp){
   if(code===0) return temp>20?'☀️':'🌤️';
   if(code<=3) return '⛅';if(code<=48) return '🌫️';
@@ -832,7 +833,7 @@ function wmoIcon(code,temp){
   if(code<=82) return '🌧️';if(code<=86) return '🌨️';
   if(code<=99) return '⛈️';return '🌥️';
 }
- 
+
 // ═══════════════════════════════════════════════════
 // TRANSPORT – Overpass + map markers
 // ═══════════════════════════════════════════════════
@@ -842,27 +843,31 @@ function distKm(lat1,lng1,lat2,lng2){
   return 6371*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 function fmtTime(off){const d=new Date(Date.now()+off*60000);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
- 
+
 let _td={trains:[],buses:[],airports:[]}, _tLoaded=false;
- 
+
+// Keep proxy awake (ping every 14 min)
+setInterval(()=>fetch(`${API_BASE}/health`).catch(()=>{}), 14*60*1000);
+
 function preloadTransport(){
-  const q=`[out:json][timeout:45];(node["railway"~"station|halt"](47.73,16.83,49.61,22.57);node["highway"="bus_stop"](47.73,16.83,49.61,22.57);node["amenity"="bus_station"](47.73,16.83,49.61,22.57);node["aeroway"~"aerodrome|terminal"](47.73,16.83,49.61,22.57););out body;`;
+  // Only load trains + airports upfront (few hundred nodes, fast)
+  // Buses loaded on demand when user clicks map
+  const q=`[out:json][timeout:30];(node["railway"~"station|halt"](47.73,16.83,49.61,22.57);node["aeroway"~"aerodrome|terminal"](47.73,16.83,49.61,22.57););out body;`;
   const overpassUrl = 'https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(q);
- 
-  // Ordered list of CORS-friendly endpoints to try
+
   const endpoints = [
-    () => fetch(`${API_BASE}/api/overpass`, {method:'POST', body:q}),
+    () => fetch(overpassUrl),                                                              // direct GET – overpass allows CORS
+    () => fetch('https://overpass.kumi.systems/api/interpreter?data=' + encodeURIComponent(q)), // mirror
     () => fetch('https://corsproxy.io/?' + encodeURIComponent(overpassUrl)),
-    () => fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(overpassUrl)),
-    () => fetch('https://thingproxy.freeboard.io/fetch/' + overpassUrl),
+    () => fetch(`${API_BASE}/api/overpass`, {method:'POST', body:q}),
   ];
- 
+
   function tryNext(i){
     if(i >= endpoints.length){ _tLoaded=true; console.warn('All transport sources failed'); return; }
     endpoints[i]()
       .then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })
       .then(data=>{
-        trainL.clearLayers(); busL.clearLayers();
+        trainL.clearLayers();
         data.elements.forEach(el=>{
           if(!el.lat||!el.lon) return;
           const name=el.tags.name||el.tags['name:sk']||el.tags['name:hu']||'–';
@@ -878,21 +883,57 @@ function preloadTransport(){
             L.marker([el.lat,el.lon],{icon:trainIcon})
               .bindPopup(`<b>🚆 ${name}</b><br><span style="color:#7d8590">${op||'ZSSK'} · Železničná stanica</span>`)
               .addTo(trainL);
-          } else {
-            _td.buses.push({name,lat:el.lat,lon:el.lon,op});
-            L.marker([el.lat,el.lon],{icon:busIcon})
-              .bindPopup(`<b>🚌 ${name}</b><br><span style="color:#7d8590">${op||'SAD'} · Zastávka</span>`)
-              .addTo(busL);
           }
         });
         _tLoaded=true;
-        console.log('Transport loaded via endpoint',i,'– trains:',_td.trains.length,'buses:',_td.buses.length);
+        console.log('Trains+airports loaded via endpoint',i,'–',_td.trains.length,'trains',_td.airports.length,'airports');
       })
       .catch(e=>{ console.warn('Transport endpoint',i,'failed:',e.message); tryNext(i+1); });
   }
   tryNext(0);
 }
- 
+
+// Load buses on demand near a clicked point (small bbox = fast)
+let _busesLoadedFor = null;
+function loadBusesNear(lat, lng){
+  const key = `${lat.toFixed(2)}_${lng.toFixed(2)}`;
+  if(_busesLoadedFor === key) return; // already loaded this area
+  _busesLoadedFor = key;
+  const pad = 0.3; // ~30km radius
+  const bbox = `${lat-pad},${lng-pad},${lat+pad},${lng+pad}`;
+  const q = `[out:json][timeout:20];(node["highway"="bus_stop"](${bbox});node["amenity"="bus_station"](${bbox}););out body;`;
+  const overpassUrl = 'https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(q);
+  const endpoints = [
+    () => fetch(overpassUrl),
+    () => fetch('https://overpass.kumi.systems/api/interpreter?data=' + encodeURIComponent(q)),
+    () => fetch('https://corsproxy.io/?' + encodeURIComponent(overpassUrl)),
+    () => fetch(`${API_BASE}/api/overpass`, {method:'POST', body:q}),
+  ];
+  function tryNext(i){
+    if(i >= endpoints.length) return;
+    endpoints[i]()
+      .then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })
+      .then(data=>{
+        data.elements.forEach(el=>{
+          if(!el.lat||!el.lon) return;
+          const name=el.tags.name||el.tags['name:sk']||el.tags['name:hu']||'–';
+          const op=el.tags.operator||el.tags.network||'';
+          // avoid duplicates
+          if(_td.buses.find(b=>b.name===name&&Math.abs(b.lat-el.lat)<0.0001)) return;
+          _td.buses.push({name,lat:el.lat,lon:el.lon,op});
+          if(map.hasLayer(busL)){
+            L.marker([el.lat,el.lon],{icon:busIcon})
+              .bindPopup(`<b>🚌 ${name}</b><br><span style="color:#7d8590">${op||'SAD'} · Zastávka</span>`)
+              .addTo(busL);
+          }
+        });
+        console.log('Buses loaded near click –',_td.buses.length,'total');
+      })
+      .catch(()=>tryNext(i+1));
+  }
+  tryNext(0);
+}
+
 function renderTransport(lat,lng){
   const tl=document.getElementById('train-list'), bl=document.getElementById('bus-list');
   if(!_tLoaded){
@@ -905,7 +946,7 @@ function renderTransport(lat,lng){
   const buses=near(_td.buses,15).slice(0,8);
   const airports=near(_td.airports,400).slice(0,3);
   const types=['R','IC','Os','Sp','Ex'], cls=['r','ic','os','os','r'];
- 
+
   let th='';
   airports.forEach(s=>{
     th+=`<div class="titem" onclick="map.flyTo([${s.lat},${s.lon}],13)"><div class="tnr ic">✈</div><div class="ti"><div class="troute">${s.name}${s.iata?' ('+s.iata+')':''}</div><div class="tsub">${s.d.toFixed(0)} km · Letisko</div></div></div>`;
@@ -915,7 +956,7 @@ function renderTransport(lat,lng){
   });
   if(!th) th='<div style="color:var(--muted);font-size:.75rem;padding:6px 0">Žiadna stanica do 100 km</div>';
   tl.innerHTML=th;
- 
+
   let bh='';
   buses.forEach((s,i)=>{
     const mhd=s.op&&(s.op.includes('MHD')||s.op.includes('DPB')||s.op.includes('DPO'));
@@ -923,14 +964,14 @@ function renderTransport(lat,lng){
   });
   if(!bh) bh='<div style="color:var(--muted);font-size:.75rem;padding:6px 0">Žiadna zastávka do 15 km</div>';
   bl.innerHTML=bh;
- 
+
   // Auto-switch to transport tab
   document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tpane').forEach(p=>p.classList.remove('active'));
   document.querySelector('.stab:nth-child(3)').classList.add('active');
   document.getElementById('tab-transport').classList.add('active');
 }
- 
+
 // ═══════════════════════════════════════════════════
 // AI ASSISTANT
 // ═══════════════════════════════════════════════════
@@ -940,13 +981,13 @@ function generateLocalAnalysis(p){
   const sz=area>5000?'Rozsiahla parcela vhodná pre investičné zámery.':area>500?'Stredná parcela, bežný rezidenčný/komerčný potenciál.':'Menšia parcela, typicky záhrada alebo dvor.';
   return `Parcela ${p.nr} (${p.ku}) – plocha ${p.area}, druh: ${p.type}. ${p.ot==='public'?'Verejný pozemok.':p.ot==='company'?'Firemný majetok.':'Fyzická osoba, štandardný prevod.'} ${sz} LV ${p.lv} – odporúča sa kontrola ťarchového listu na ESKN portáli. [Lokálna analýza]`;
 }
- 
+
 function toggleAI(){
   aiOpen=!aiOpen;
   document.getElementById('aibody').classList.toggle('open',aiOpen);
   document.getElementById('aichev').textContent=aiOpen?'▲':'▼';
 }
- 
+
 async function askAI(){
   if(!currentParcel){showNotif('AI','Najprv klikni na parcelu');return;}
   const btn=document.getElementById('aibtn'), resp=document.getElementById('airesp');
@@ -965,7 +1006,7 @@ async function askAI(){
   }
   btn.textContent='✨ Analyzovať znova';btn.disabled=false;
 }
- 
+
 // ═══════════════════════════════════════════════════
 // MEASUREMENT
 // ═══════════════════════════════════════════════════
@@ -981,7 +1022,7 @@ function setTool(t){
   if(t==='dist'){document.getElementById('distBtn').classList.add('active');setSbar('Klikni na 2 body na mape');}
   if(t==='area'){document.getElementById('areaBtn').classList.add('active');setSbar('Klikni na body plochy · dvojklik = dokončenie');}
 }
- 
+
 function handleDist(e){
   const mk=L.circleMarker(e.latlng,{radius:5,color:'#2da44e',fillColor:'#2da44e',fillOpacity:1,weight:2}).addTo(map);
   mMarkers.push(mk);mPoints.push(e.latlng);
@@ -995,7 +1036,7 @@ function handleDist(e){
     mPoints=[];mMarkers.forEach(m=>map.removeLayer(m));mMarkers=[];
   }
 }
- 
+
 function handleArea(e){
   const mk=L.circleMarker(e.latlng,{radius:5,color:'#d29922',fillColor:'#d29922',fillOpacity:1,weight:2}).addTo(map);
   mMarkers.push(mk);mPoints.push(e.latlng);
@@ -1007,7 +1048,7 @@ function handleArea(e){
     setSbar(`Plocha: <b>${area.toFixed(0)} m²</b>`);
   }
 }
- 
+
 function finishArea(){
   if(mPoints.length<3)return;
   const coords=mPoints.map(p=>[p.lng,p.lat]);coords.push(coords[0]);
@@ -1020,7 +1061,7 @@ function finishArea(){
   document.getElementById('areaBtn').classList.remove('active');
   mMarkers.forEach(m=>map.removeLayer(m));mMarkers=[];mPoints=[];
 }
- 
+
 // ═══════════════════════════════════════════════════
 // PDF EXPORT
 // ═══════════════════════════════════════════════════
@@ -1103,7 +1144,7 @@ async function exportPDF(){
   setTimeout(()=>{toast.classList.remove('show');fill.style.width='0%';},2000);
   showNotif('PDF','Stiahnuté');
 }
- 
+
 // ═══════════════════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════════════════
@@ -1155,7 +1196,7 @@ function setLoggedIn(u){
   document.getElementById('uavt').textContent=initials;
   document.getElementById('uname').textContent=u.name;
 }
- 
+
 // ═══════════════════════════════════════════════════
 // UI HELPERS
 // ═══════════════════════════════════════════════════
@@ -1192,7 +1233,7 @@ function copyCoords(){
   navigator.clipboard?.writeText(txt).then(()=>showNotif('Skopírované',txt));
 }
 function gotoKataster(){window.open('https://kataster.skgeodesy.sk/eskn-portal/','_blank');}
- 
+
 let sbOpen=true;
 function toggleSidebar(){
   sbOpen=!sbOpen;
@@ -1203,7 +1244,7 @@ function toggleSidebar(){
   btn.textContent=sbOpen?'◀':'▶';
   setTimeout(()=>map.invalidateSize(),280);
 }
- 
+
 // Lang
 function toggleLangMenu(){ document.getElementById('lmenu').classList.toggle('open'); }
 function setLang(l,flag,el){
@@ -1219,7 +1260,7 @@ document.addEventListener('click',e=>{
   const d=document.getElementById('ldrop');
   if(d&&!d.contains(e.target)) document.getElementById('lmenu').classList.remove('open');
 });
- 
+
 // ═══════════════════════════════════════════════════
 // STARTUP
 // ═══════════════════════════════════════════════════
