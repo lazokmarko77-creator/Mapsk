@@ -638,15 +638,17 @@ const cadL = L.tileLayer.wms('https://zbgis.skgeodesy.sk/mkzbgis/sk/kataster/wms
   errorTileUrl:'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 });
 
-// SVP Flood WMS – INSPIRE MPO (official, public)
+// SVP Flood WMS – INSPIRE MPO – layer 0 = Q100 árvízveszély zóna
 const floodL = L.tileLayer.wms('https://mpt.svp.sk/server/services/inspire/INSPIRE_MPO/MapServer/WMSServer',{
-  layers:'0',format:'image/png',transparent:true,version:'1.3.0',opacity:0.6,
+  layers:'0',format:'image/png',transparent:true,version:'1.3.0',opacity:0.65,
+  minZoom:7,maxZoom:20,
   errorTileUrl:'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 });
 
-// ŠOPSR Nature WMS – use ZBGIS geoportal (reliable, same origin as kataster)
-const natureL = L.tileLayer.wms('https://zbgis.skgeodesy.sk/mkzbgis/sk/kataster/wms',{
-  layers:'CLC18_L1',format:'image/png',transparent:true,version:'1.3.0',opacity:0.5,
+// ŠOPSR Nature – INSPIRE chránené územia (NP + CHKO) – ZBGIS INSPIRE endpoint
+const natureL = L.tileLayer.wms('https://inspire.gov.sk/services/wms',{
+  layers:'PS.ProtectedSite',format:'image/png',transparent:true,version:'1.3.0',opacity:0.55,
+  minZoom:7,maxZoom:20,
   errorTileUrl:'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 });
 
@@ -697,17 +699,19 @@ function setBase(type){
 function togLayer(id, el){
   const l=layerMap[id]; if(!l) return;
   const tog=document.getElementById('tog-'+id);
+  const nm=el.querySelector('.lname')?.textContent||id;
   if(map.hasLayer(l)){
     map.removeLayer(l); tog?.classList.remove('on'); el.classList.remove('on');
     if(id==='cad') cadActive=false;
-    setSbar(t('tab_layers')+': '+el.querySelector('.lname')?.textContent+' vypnutá');
+    if(id==='bus'){ _td_buses=[]; _busKey=null; busL.clearLayers(); }
+    setSbar(nm+' – vypnutá');
   } else {
     l.addTo(map); tog?.classList.add('on'); el.classList.add('on');
-    if(id==='cad'){ cadActive=true; setSbar('🏠 '+t('cadastre')+' zapnutý – klikni na parcelu'); }
-    if(id==='flood') setSbar('🌊 '+t('flood')+' – SVP WMS');
-    if(id==='nature') setSbar('🌲 '+t('nature')+' – ZBGIS WMS');
-    if(id==='train') setSbar('🚆 '+t('railway')+' – OSM');
-    if(id==='bus') setSbar('🚌 '+t('bus_stops')+' – klikni na mapu');
+    if(id==='cad'){ cadActive=true; setSbar('🏠 '+t('cadastre')+' – klikni na parcelu'); }
+    if(id==='flood') setSbar('🌊 '+t('flood')+' – SVP WMS · načítava…');
+    if(id==='nature') setSbar('🌲 '+t('nature')+' – INSPIRE WMS · načítava…');
+    if(id==='train') setSbar('🚆 '+t('railway')+' – OSM · '+_td.trains.length+' staníc');
+    if(id==='bus') setSbar('🚌 '+t('bus_stops')+' – klikni na mapu pre oblast');
   }
 }
 
@@ -836,23 +840,33 @@ function fillUI(p,latlng){
 // ═══════════════════════════════════════════════
 async function fetchWeather(lat,lng){
   try{
-    const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation,weathercode&hourly=temperature_2m,precipitation_probability,weathercode&forecast_days=1&timezone=Europe/Bratislava`);
+    // Precise current conditions - explicit field names
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}`+
+      `&current=temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation,weather_code`+
+      `&hourly=temperature_2m,precipitation_probability,weather_code`+
+      `&forecast_days=1&timezone=Europe%2FBratislava&timeformat=unixtime`;
+    const r=await fetch(url);
     const d=await r.json();
-    const c=d.current||d.current_weather; if(!c)return;
+    const c=d.current; if(!c)return;
     lastWeather=c;
-    const temp=c.temperature_2m??c.temperature, hum=c.relative_humidity_2m??'–';
-    const wind=c.wind_speed_10m??c.windspeed, prec=c.precipitation??0;
-    const ico=wmoIcon(c.weathercode??c.weather_code??0,temp);
+    const temp=c.temperature_2m, hum=c.relative_humidity_2m??'–';
+    const wind=c.wind_speed_10m, prec=c.precipitation??0;
+    const ico=wmoIcon(c.weather_code??0, temp);
+    const wLabel={0:'Jasno',1:'Prevažne jasno',2:'Polojasno',3:'Zamračené',45:'Hmla',48:'Hmla',
+      51:'Mrholenie',61:'Dážď',63:'Dážď',65:'Silný dážď',71:'Sneženie',73:'Sneženie',75:'Silné sneženie',
+      80:'Prehánky',81:'Prehánky',82:'Silné prehánky',95:'Búrka',96:'Búrka',99:'Búrka'};
+    const desc=wLabel[c.weather_code]||'Oblačno';
     document.getElementById('wcard').innerHTML=
-      `<div class="w-now"><div class="w-ico-big">${ico}</div><div><div class="w-temp-big">${temp}°C</div><div class="w-desc">Open-Meteo · Live</div></div></div>`+
-      `<div class="w-stats"><div class="w-stat"><div class="w-stat-l">${t('humidity')}</div><div class="w-stat-v">${hum}%</div></div>`+
+      `<div class="w-now"><div class="w-ico-big">${ico}</div><div><div class="w-temp-big">${temp}°C</div><div class="w-desc">${desc} · Open-Meteo</div></div></div>`+
+      `<div class="w-stats">`+
+      `<div class="w-stat"><div class="w-stat-l">${t('humidity')}</div><div class="w-stat-v">${hum}%</div></div>`+
       `<div class="w-stat"><div class="w-stat-l">${t('wind')}</div><div class="w-stat-v">${wind} km/h</div></div>`+
       `<div class="w-stat"><div class="w-stat-l">${t('rain')}</div><div class="w-stat-v">${prec} mm</div></div>`+
-      `<div class="w-stat"><div class="w-stat-l">API</div><div class="w-stat-v" style="color:var(--accent);font-size:.7rem">Live ✓</div></div></div>`;
+      `<div class="w-stat"><div class="w-stat-l">Zdroj</div><div class="w-stat-v" style="color:var(--accent);font-size:.7rem">Live ✓</div></div></div>`;
     const nowH=new Date().getHours();
     let html='';
-    (d.hourly?.time||[]).slice(0,12).forEach((t2,i)=>{
-      const h=new Date(t2).getHours(), ic=wmoIcon(d.hourly.weathercode[i],d.hourly.temperature_2m[i]);
+    (d.hourly?.time||[]).slice(0,12).forEach((ts,i)=>{
+      const h=new Date(ts*1000).getHours(), ic=wmoIcon(d.hourly.weather_code[i],d.hourly.temperature_2m[i]);
       html+=`<div class="w-h${h===nowH?' now':''}"><div style="color:var(--muted)">${String(h).padStart(2,'0')}h</div><div class="w-h-ico">${ic}</div><div class="w-h-t">${Math.round(d.hourly.temperature_2m[i])}°</div><div class="w-h-p">${d.hourly.precipitation_probability[i]}%</div></div>`;
     });
     document.getElementById('hourly').innerHTML=`<div class="w-hourly">${html}</div>`;
@@ -901,43 +915,60 @@ function overpassGet(q, cb){
 setInterval(()=>fetch(`${API_BASE}/health`).catch(()=>{}), 14*60*1000);
 
 function preloadTransport(){
-  // Slovakia bbox only – trains + airports (small dataset, fast)
-  const q=`[out:json][timeout:25];(node["railway"~"station|halt"](47.73,16.83,49.61,22.57);node["aeroway"~"aerodrome"](47.73,16.83,49.61,22.57););out body;`;
-  overpassGet(q, data=>{
-    trainL.clearLayers();
-    data.elements.forEach(el=>{
-      if(!el.lat||!el.lon)return;
-      const name=el.tags.name||el.tags['name:sk']||'–';
-      const op=el.tags.operator||el.tags.network||'';
-      if(el.tags.aeroway){
-        const iata=el.tags.iata||'';
-        _td.airports.push({name,lat:el.lat,lon:el.lon,iata,op});
-        L.marker([el.lat,el.lon],{icon:airIcon})
-          .bindPopup(`<b>✈ ${name}</b>${iata?' ('+iata+')':''}<br><span style="color:#7d8590">Letisko</span>`)
-          .addTo(trainL);
-      } else {
-        _td.trains.push({name,lat:el.lat,lon:el.lon,op});
-        L.marker([el.lat,el.lon],{icon:trainIcon})
-          .bindPopup(`<b>🚆 ${name}</b><br><span style="color:#7d8590">${op||'ZSSK'} · Stanica</span>`)
-          .addTo(trainL);
-      }
+  const SK=[47.73,16.83,49.61,22.57];
+  const q=`[out:json][timeout:30];(node["railway"~"station|halt"](${SK.join(',')});node["aeroway"~"aerodrome"](${SK.join(',')}););out body;`;
+  let attempts=0;
+  function tryLoad(){
+    attempts++;
+    overpassGet(q, data=>{
+      _td.trains=[]; _td.airports=[];
+      trainL.clearLayers();
+      data.elements.forEach(el=>{
+        if(!el.lat||!el.lon)return;
+        if(el.lat<SK[0]||el.lat>SK[2]||el.lon<SK[1]||el.lon>SK[3])return; // SK only
+        const name=el.tags.name||el.tags['name:sk']||'–';
+        const op=el.tags.operator||el.tags.network||'';
+        if(el.tags.aeroway){
+          const iata=el.tags.iata||'';
+          _td.airports.push({name,lat:el.lat,lon:el.lon,iata,op});
+          L.marker([el.lat,el.lon],{icon:airIcon})
+            .bindPopup(`<b>✈ ${name}</b>${iata?' ('+iata+')':''}<br><span style="color:#7d8590">Letisko · SK</span>`)
+            .addTo(trainL);
+        } else {
+          _td.trains.push({name,lat:el.lat,lon:el.lon,op});
+          L.marker([el.lat,el.lon],{icon:trainIcon})
+            .bindPopup(`<b>🚆 ${name}</b><br><span style="color:#7d8590">${op||'ZSSK'} · Stanica SK</span>`)
+            .addTo(trainL);
+        }
+      });
+      _tLoaded=true;
+      console.log('SK transport: trains',_td.trains.length,'airports',_td.airports.length);
     });
-    _tLoaded=true;
-    console.log('Transport: trains',_td.trains.length,'airports',_td.airports.length);
-  });
+    if(attempts<3) setTimeout(()=>{ if(!_tLoaded) tryLoad(); },10000);
+  }
+  tryLoad();
 }
 
 function loadBusesNear(lat,lng){
+  // Clamp to Slovakia bounds
+  const skMinLat=47.73,skMaxLat=49.61,skMinLng=16.83,skMaxLng=22.57;
+  lat=Math.max(skMinLat+0.15,Math.min(skMaxLat-0.15,lat));
+  lng=Math.max(skMinLng+0.15,Math.min(skMaxLng-0.15,lng));
   const key=`${lat.toFixed(1)}_${lng.toFixed(1)}`;
   if(_busKey===key)return;
   _busKey=key;
-  const pad=0.15;
-  const bbox=`${lat-pad},${lng-pad},${lat+pad},${lng+pad}`;
+  const pad=0.12;
+  // Intersect with SK bounds to never go outside Slovakia
+  const s=Math.max(lat-pad,skMinLat), n=Math.min(lat+pad,skMaxLat);
+  const w=Math.max(lng-pad,skMinLng), e2=Math.min(lng+pad,skMaxLng);
+  const bbox=`${s},${w},${n},${e2}`;
   const q=`[out:json][timeout:15];(node["highway"="bus_stop"](${bbox});node["amenity"="bus_station"](${bbox}););out body;`;
   overpassGet(q, data=>{
     let added=0;
     data.elements.forEach(el=>{
       if(!el.lat||!el.lon||added>=200)return;
+      // Double-check within SK bounds
+      if(el.lat<skMinLat||el.lat>skMaxLat||el.lon<skMinLng||el.lon>skMaxLng)return;
       const name=el.tags.name||el.tags['name:sk']||'–';
       const op=el.tags.operator||el.tags.network||'';
       if(_td_buses.find(b=>Math.abs(b.lat-el.lat)<0.00005))return;
@@ -949,7 +980,7 @@ function loadBusesNear(lat,lng){
         added++;
       }
     });
-    console.log('Buses added:',added);
+    console.log('SK buses added:',added);
   });
 }
 
@@ -1000,36 +1031,46 @@ async function askAI(){
 // ═══════════════════════════════════════════════
 // MEASUREMENT
 // ═══════════════════════════════════════════════
-function setTool(newTool){
-  mMarkers.forEach(m=>map.removeLayer(m));mMarkers=[];mPoints=[];
-  if(mLine){map.removeLayer(mLine);mLine=null;}
-  if(mPolygon){map.removeLayer(mPolygon);mPolygon=null;}
+let mAllLines=[], mAllMarkers=[], mAllPolygons=[];
+
+function clearAllMeasurements(){
+  mAllMarkers.forEach(m=>map.removeLayer(m)); mAllMarkers=[];
+  mAllLines.forEach(l=>map.removeLayer(l)); mAllLines=[];
+  mAllPolygons.forEach(p=>map.removeLayer(p)); mAllPolygons=[];
+  mPoints=[]; mMarkers=[]; mLine=null; mPolygon=null;
   map.closePopup();
+}
+
+function setTool(newTool){
+  clearAllMeasurements();
   document.getElementById('distBtn').classList.remove('active');
   document.getElementById('areaBtn').classList.remove('active');
   if(tool===newTool){tool=null;map.getContainer().style.cursor='';setSbar(t('click_parcel'));return;}
   tool=newTool;map.getContainer().style.cursor='crosshair';
-  if(tool==='dist'){document.getElementById('distBtn').classList.add('active');setSbar(t('status_measure')||'Klikni 2 body');}
-  if(tool==='area'){document.getElementById('areaBtn').classList.add('active');setSbar(t('status_area')||'Klikni body · dblclick = dokončenie');}
+  if(tool==='dist'){document.getElementById('distBtn').classList.add('active');setSbar('📏 Klikni 2 body na mape');}
+  if(tool==='area'){document.getElementById('areaBtn').classList.add('active');setSbar('⬡ Klikni body · dvojklik = dokončenie');}
 }
 function handleDist(e){
   const mk=L.circleMarker(e.latlng,{radius:5,color:'#2da44e',fillColor:'#2da44e',fillOpacity:1,weight:2}).addTo(map);
-  mMarkers.push(mk);mPoints.push(e.latlng);
+  mMarkers.push(mk); mAllMarkers.push(mk); mPoints.push(e.latlng);
   if(mPoints.length===2){
-    mLine=L.polyline(mPoints,{color:'#2da44e',weight:2.5,dashArray:'7 4'}).addTo(map);
+    const ln=L.polyline(mPoints,{color:'#2da44e',weight:2.5,dashArray:'7 4'}).addTo(map);
+    mAllLines.push(ln);
     const d=turf.distance(turf.point([mPoints[0].lng,mPoints[0].lat]),turf.point([mPoints[1].lng,mPoints[1].lat]),{units:'meters'});
     const lbl=d<1000?d.toFixed(1)+' m':(d/1000).toFixed(3)+' km';
-    L.popup({className:'mtooltip'}).setLatLng(mPoints[1]).setContent('📏 '+lbl).openOn(map);
+    const popup=L.popup({className:'mtooltip'}).setLatLng(mPoints[1]).setContent('📏 '+lbl).openOn(map);
     setSbar(`📏 <b>${lbl}</b>`);
-    mPoints=[];mMarkers.forEach(m=>map.removeLayer(m));mMarkers=[];
+    mPoints=[]; mMarkers=[];
+    // Allow next measurement without clearing previous ones
   }
 }
 function handleArea(e){
   const mk=L.circleMarker(e.latlng,{radius:5,color:'#d29922',fillColor:'#d29922',fillOpacity:1,weight:2}).addTo(map);
-  mMarkers.push(mk);mPoints.push(e.latlng);
-  if(mPolygon)map.removeLayer(mPolygon);
+  mMarkers.push(mk); mAllMarkers.push(mk); mPoints.push(e.latlng);
+  if(mPolygon){ map.removeLayer(mPolygon); mAllPolygons=mAllPolygons.filter(p=>p!==mPolygon); }
   if(mPoints.length>=3){
     mPolygon=L.polygon(mPoints,{color:'#d29922',weight:2,fillColor:'#d29922',fillOpacity:.1,dashArray:'5'}).addTo(map);
+    mAllPolygons.push(mPolygon);
     const coords=mPoints.map(p=>[p.lng,p.lat]);coords.push(coords[0]);
     setSbar(`⬡ <b>${turf.area(turf.polygon([coords])).toFixed(0)} m²</b>`);
   }
@@ -1040,16 +1081,17 @@ function finishArea(){
   const area=turf.area(turf.polygon([coords]));
   const res=document.getElementById('area-res');
   res.style.display='block';res.innerHTML=`⬡ <b>${area.toFixed(1)} m²</b> (${(area/10000).toFixed(4)} ha)`;
-  openRP();setSbar(`⬡ <b>${area.toFixed(1)} m²</b>`);
-  tool=null;map.getContainer().style.cursor='';
+  openRP(); setSbar(`⬡ <b>${area.toFixed(1)} m²</b>`);
+  tool=null; map.getContainer().style.cursor='';
   document.getElementById('areaBtn').classList.remove('active');
-  mMarkers.forEach(m=>map.removeLayer(m));mMarkers=[];mPoints=[];
+  mMarkers=[]; mPoints=[];
 }
 
 // ═══════════════════════════════════════════════
 // PDF EXPORT
 // ═══════════════════════════════════════════════
 async function exportPDF(){
+  if(!currentParcel){ showNotif('PDF', lang==='sk'?'Najprv klikni na parcelu':lang==='en'?'Select a parcel first':lang==='hu'?'Először válassz parcellát':'Zuerst ein Grundstück auswählen'); return; }
   if(!window.jspdf)return;
   const{jsPDF}=window.jspdf;
   const toast=document.getElementById('pdfToast'),fill=document.getElementById('pdfFill'),msg=document.getElementById('pdfMsg');
@@ -1157,50 +1199,123 @@ function setLang(l,flag,el){
   document.getElementById('lmenu').classList.remove('open');
   document.documentElement.lang=l;
   applyTranslations();
-  showNotif('🌐', l.toUpperCase());
+  // Re-render transport lists if data exists
+  if(_pendingTransportLL) renderTransport(_pendingTransportLL[0],_pendingTransportLL[1]);
+  // Re-render mobile sheet if open
+  if(document.getElementById('mobSheet').classList.contains('open')&&mobActiveTab&&mobActiveTab!=='map'&&mobActiveTab!=='tools'){
+    renderMobSheet(mobActiveTab);
+  }
+  // Update status bar
+  setSbar(t('click_parcel'));
+  showNotif('🌐', l==='sk'?'Slovenčina':l==='en'?'English':l==='hu'?'Magyar':'Deutsch');
 }
 document.addEventListener('click',e=>{const d=document.getElementById('ldrop');if(d&&!d.contains(e.target))document.getElementById('lmenu').classList.remove('open');});
 
-// ═══════════════════════════════════════════════
-// MOBILE NAVIGATION
-// ═══════════════════════════════════════════════
-let mobActive='map';
+function mobileTogLayer(id){
+  // Find the original litem in the real sidebar DOM
+  const el=document.getElementById('li-'+id);
+  if(el) togLayer(id,el);
+  // Re-render the mobile sheet to reflect updated state
+  const activeTab=document.querySelector('.mnav-btn.active')?.id?.replace('mnav-','');
+  if(activeTab&&activeTab!=='map'&&activeTab!=='tools') renderMobSheet(activeTab);
+}
+
+function renderMobSheet(tab){
+  if(tab==='layers'){
+    // Build layers HTML directly reflecting current state
+    const layers=[
+      {id:'osm',icon:'🗺️',name:'OpenStreetMap',desc:'Štandardná mapa',base:true},
+      {id:'sat',icon:'🛰️',name:'Ortofoto',desc:'Letecké snímky SR',base:true},
+      {id:'cad',icon:'🏠',name:t('cadastre'),desc:'ZBGIS WMS'},
+      {id:'flood',icon:'🌊',name:t('flood'),desc:'SVP WMS'},
+      {id:'nature',icon:'🌲',name:t('nature'),desc:'INSPIRE WMS'},
+      {id:'train',icon:'🚆',name:t('railway'),desc:'OSM Overpass'},
+      {id:'bus',icon:'🚌',name:t('bus_stops'),desc:'OSM Overpass'},
+    ];
+    let html=`<div style="padding-top:4px"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;margin-bottom:12px">📚 ${t('tab_layers')}</div>`;
+    layers.forEach(lyr=>{
+      const isOn = lyr.base
+        ? (lyr.id==='osm'?map.hasLayer(osmL):map.hasLayer(satL))
+        : map.hasLayer(layerMap[lyr.id]);
+      const onclick = lyr.base
+        ? `setBase('${lyr.id}');renderMobSheet('layers')`
+        : `mobileTogLayer('${lyr.id}')`;
+      html+=`<div class="litem${isOn?' on':''}" onclick="${onclick}" style="margin-bottom:8px">
+        <div class="lic" style="background:rgba(45,164,78,.1)">${lyr.icon}</div>
+        <div class="linfo"><div class="lname">${lyr.name}</div><div class="ldesc">${lyr.desc}</div></div>
+        <div class="tog${isOn?' on':''}"></div>
+      </div>`;
+    });
+    html+='</div>';
+    document.getElementById('mobSheetContent').innerHTML=html;
+  } else if(tab==='weather'){
+    const wcard=document.getElementById('wcard').innerHTML;
+    const hourly=document.getElementById('hourly').innerHTML;
+    document.getElementById('mobSheetContent').innerHTML=
+      `<div style="padding-top:4px"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;margin-bottom:12px">🌤️ ${t('tab_weather')}</div>${wcard}<div class="sec-ttl" style="margin-top:10px">${t('hourly')}</div>${hourly}</div>`;
+  } else if(tab==='transport'){
+    const tl=document.getElementById('train-list').innerHTML;
+    const bl=document.getElementById('bus-list').innerHTML;
+    document.getElementById('mobSheetContent').innerHTML=
+      `<div style="padding-top:4px"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;margin-bottom:12px">🚆 ${t('tab_transport')}</div>
+      <div class="sec-ttl">${t('trains_nearby')}</div>${tl}
+      <div class="sec-ttl" style="margin-top:10px">${t('buses_nearby')}</div>${bl}</div>`;
+  }
+}
+let mobActiveTab='map';
 function mobileTab(tab){
   document.querySelectorAll('.mnav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('mnav-'+tab)?.classList.add('active');
-  mobActive=tab;
+  mobActiveTab=tab;
   if(tab==='map'){ closeMobSheet(); return; }
   if(tab==='tools'){
-    openMobSheet(`
+    document.getElementById('mobSheetContent').innerHTML=`
       <div style="padding-top:4px">
-        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;margin-bottom:14px">🔧 Nástroje</div>
-        <button class="hbtn" style="width:100%;justify-content:center;margin-bottom:8px;padding:11px" onclick="setTool('dist');closeMobSheet();mobileTab('map')">📏 ${t('measure')}</button>
-        <button class="hbtn" style="width:100%;justify-content:center;margin-bottom:8px;padding:11px" onclick="setTool('area');closeMobSheet();mobileTab('map')">⬡ ${t('area')}</button>
-        <button class="hbtn primary" style="width:100%;justify-content:center;margin-bottom:8px;padding:11px" onclick="exportPDF()">⬇ ${t('export')} PDF</button>
-        <button class="hbtn" style="width:100%;justify-content:center;padding:11px" onclick="locateMe();closeMobSheet();mobileTab('map')">◎ Moja poloha</button>
-      </div>`);
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;margin-bottom:14px">🔧 ${t('tools')}</div>
+        <button class="hbtn" style="width:100%;justify-content:center;margin-bottom:8px;padding:12px" onclick="setTool('dist');closeMobSheet();mobileTab('map')">📏 ${t('measure')}</button>
+        <button class="hbtn" style="width:100%;justify-content:center;margin-bottom:8px;padding:12px" onclick="setTool('area');closeMobSheet();mobileTab('map')">⬡ ${t('area')}</button>
+        <button class="hbtn primary" style="width:100%;justify-content:center;margin-bottom:8px;padding:12px" onclick="exportPDF()">⬇ ${t('export')} PDF</button>
+        <button class="hbtn" style="width:100%;justify-content:center;padding:12px" onclick="locateMe();closeMobSheet();mobileTab('map')">◎ ${lang==='sk'?'Moja poloha':lang==='en'?'My location':lang==='hu'?'Saját pozíció':'Mein Standort'}</button>
+      </div>`;
+    document.getElementById('mobSheet').classList.add('open');
     return;
   }
-  // For layers/weather/transport: show the sidebar content in bottom sheet
-  const content=document.getElementById('tab-'+tab);
-  if(content) openMobSheet('<div style="padding-top:4px">'+content.outerHTML.replace('class="tpane"','class="tpane active"').replace('class="tpane active"','class="tpane active"')+'</div>');
-  if(tab==='transport'&&_pendingTransportLL){renderTransport(_pendingTransportLL[0],_pendingTransportLL[1]);_pendingTransportLL=null;}
-}
-function openMobSheet(html){
-  document.getElementById('mobSheetContent').innerHTML=html;
+  renderMobSheet(tab);
   document.getElementById('mobSheet').classList.add('open');
+  if(tab==='transport'&&_pendingTransportLL){
+    renderTransport(_pendingTransportLL[0],_pendingTransportLL[1]);
+    _pendingTransportLL=null;
+    renderMobSheet('transport');
+  }
   setTimeout(()=>map.invalidateSize(),300);
 }
 function closeMobSheet(){
   document.getElementById('mobSheet').classList.remove('open');
+  // Reset mobile nav to map
+  document.querySelectorAll('.mnav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('mnav-map')?.classList.add('active');
+  mobActiveTab='map';
   setTimeout(()=>map.invalidateSize(),300);
 }
 // Swipe down to close sheet
 let touchStartY=0;
 document.getElementById('mobSheet').addEventListener('touchstart',e=>{touchStartY=e.touches[0].clientY;},{passive:true});
-document.getElementById('mobSheet').addEventListener('touchmove',e=>{
-  if(e.touches[0].clientY-touchStartY>60) closeMobSheet();
-},{passive:true});
+document.getElementById('mobSheet').addEventListener('touchmove',e=>{if(e.touches[0].clientY-touchStartY>60)closeMobSheet();},{passive:true});
+
+// Close sheet when resizing to desktop, open sidebar when resizing to desktop
+window.addEventListener('resize',()=>{
+  const isMobile=window.innerWidth<=768;
+  if(!isMobile){
+    // Desktop: close sheet, ensure sidebar visible
+    document.getElementById('mobSheet').classList.remove('open');
+    document.getElementById('sidebar').classList.remove('collapsed');
+    sbOpen=true;
+  } else {
+    // Mobile: collapse sidebar (it's hidden via CSS anyway)
+    document.getElementById('rpanel').classList.remove('open');
+  }
+  setTimeout(()=>map.invalidateSize(),300);
+});
 
 // ═══════════════════════════════════════════════
 // STARTUP
