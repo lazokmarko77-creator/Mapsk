@@ -703,7 +703,7 @@ function togLayer(id, el){
   if(map.hasLayer(l)){
     map.removeLayer(l); tog?.classList.remove('on'); el.classList.remove('on');
     if(id==='cad') cadActive=false;
-    if(id==='bus'){ _td_buses=[]; _busKey=null; busL.clearLayers(); }
+    if(id==='bus'){ _td_buses=[]; _busKey=null; _busLoaded=false; busL.clearLayers(); }
     setSbar(nm+' – vypnutá');
   } else {
     l.addTo(map); tog?.classList.add('on'); el.classList.add('on');
@@ -929,7 +929,7 @@ function preloadTransport(){
           if(el.lat<SK[0]||el.lat>SK[2]||el.lon<SK[1]||el.lon>SK[3])return;
           const name=el.tags.name||el.tags['name:sk']||'–';
           const op=el.tags.operator||el.tags.network||'';
-          if(el.tags.aeroway){
+          if(el.tags.aeroway==='aerodrome'&&(el.tags.iata||el.tags.icao||(el.tags.name&&el.tags.aerodrome!=='private'))){
             const iata=el.tags.iata||'';
             _td.airports.push({name,lat:el.lat,lon:el.lon,iata,op});
             L.marker([el.lat,el.lon],{icon:airIcon})
