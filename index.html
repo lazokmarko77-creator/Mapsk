@@ -894,20 +894,20 @@ function distKm(lat1,lng1,lat2,lng2){
 }
 function fmtTime(off){const d=new Date(Date.now()+off*60000);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
 
-let _td={trains:[],airports:[]}, _tLoaded=false, _td_buses=[], _busKey=null;
+let _td={trains:[],airports:[]}, _tLoaded=false, _tFailed=false;
+let _td_buses=[], _busKey=null, _busLoaded=false;
 
-function overpassGet(q, cb){
-  // Direct GET – overpass-api.de supports CORS on GET requests
+function overpassGet(q, onSuccess, onFail){
   const url='https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q);
   const mirror='https://overpass.kumi.systems/api/interpreter?data='+encodeURIComponent(q);
   fetch(url)
     .then(r=>{ if(!r.ok)throw new Error(r.status); return r.json(); })
-    .then(cb)
+    .then(onSuccess)
     .catch(()=>{
       fetch(mirror)
         .then(r=>{ if(!r.ok)throw new Error(r.status); return r.json(); })
-        .then(cb)
-        .catch(e=>console.warn('Overpass failed:',e));
+        .then(onSuccess)
+        .catch(e=>{ console.warn('Overpass failed:',e.message); if(onFail) onFail(); });
     });
 }
 
@@ -920,90 +920,118 @@ function preloadTransport(){
   let attempts=0;
   function tryLoad(){
     attempts++;
-    overpassGet(q, data=>{
-      _td.trains=[]; _td.airports=[];
-      trainL.clearLayers();
-      data.elements.forEach(el=>{
-        if(!el.lat||!el.lon)return;
-        if(el.lat<SK[0]||el.lat>SK[2]||el.lon<SK[1]||el.lon>SK[3])return; // SK only
-        const name=el.tags.name||el.tags['name:sk']||'–';
-        const op=el.tags.operator||el.tags.network||'';
-        if(el.tags.aeroway){
-          const iata=el.tags.iata||'';
-          _td.airports.push({name,lat:el.lat,lon:el.lon,iata,op});
-          L.marker([el.lat,el.lon],{icon:airIcon})
-            .bindPopup(`<b>✈ ${name}</b>${iata?' ('+iata+')':''}<br><span style="color:#7d8590">Letisko · SK</span>`)
-            .addTo(trainL);
-        } else {
-          _td.trains.push({name,lat:el.lat,lon:el.lon,op});
-          L.marker([el.lat,el.lon],{icon:trainIcon})
-            .bindPopup(`<b>🚆 ${name}</b><br><span style="color:#7d8590">${op||'ZSSK'} · Stanica SK</span>`)
-            .addTo(trainL);
-        }
-      });
-      _tLoaded=true;
-      console.log('SK transport: trains',_td.trains.length,'airports',_td.airports.length);
-    });
-    if(attempts<3) setTimeout(()=>{ if(!_tLoaded) tryLoad(); },10000);
+    overpassGet(q,
+      data=>{
+        _td.trains=[]; _td.airports=[];
+        trainL.clearLayers();
+        data.elements.forEach(el=>{
+          if(!el.lat||!el.lon)return;
+          if(el.lat<SK[0]||el.lat>SK[2]||el.lon<SK[1]||el.lon>SK[3])return;
+          const name=el.tags.name||el.tags['name:sk']||'–';
+          const op=el.tags.operator||el.tags.network||'';
+          if(el.tags.aeroway){
+            const iata=el.tags.iata||'';
+            _td.airports.push({name,lat:el.lat,lon:el.lon,iata,op});
+            L.marker([el.lat,el.lon],{icon:airIcon})
+              .bindPopup(`<b>✈ ${name}</b>${iata?' ('+iata+')':''}<br><span style="color:#7d8590">Letisko · SK</span>`)
+              .addTo(trainL);
+          } else {
+            _td.trains.push({name,lat:el.lat,lon:el.lon,op});
+            L.marker([el.lat,el.lon],{icon:trainIcon})
+              .bindPopup(`<b>🚆 ${name}</b><br><span style="color:#7d8590">${op||'ZSSK'} · Stanica SK</span>`)
+              .addTo(trainL);
+          }
+        });
+        _tLoaded=true; _tFailed=false;
+        console.log('SK transport: trains',_td.trains.length,'airports',_td.airports.length);
+      },
+      ()=>{
+        // On fail: retry up to 3x, then mark failed but don't block anything
+        if(attempts<3){ setTimeout(tryLoad, 10000); }
+        else { _tFailed=true; _tLoaded=true; console.warn('Transport: all attempts failed'); }
+      }
+    );
   }
   tryLoad();
 }
 
 function loadBusesNear(lat,lng){
-  // Clamp to Slovakia bounds
-  const skMinLat=47.73,skMaxLat=49.61,skMinLng=16.83,skMaxLng=22.57;
-  lat=Math.max(skMinLat+0.15,Math.min(skMaxLat-0.15,lat));
-  lng=Math.max(skMinLng+0.15,Math.min(skMaxLng-0.15,lng));
+  const SK=[47.73,16.83,49.61,22.57];
+  lat=Math.max(SK[0]+0.12,Math.min(SK[2]-0.12,lat));
+  lng=Math.max(SK[1]+0.12,Math.min(SK[3]-0.12,lng));
   const key=`${lat.toFixed(1)}_${lng.toFixed(1)}`;
   if(_busKey===key)return;
   _busKey=key;
   const pad=0.12;
-  // Intersect with SK bounds to never go outside Slovakia
-  const s=Math.max(lat-pad,skMinLat), n=Math.min(lat+pad,skMaxLat);
-  const w=Math.max(lng-pad,skMinLng), e2=Math.min(lng+pad,skMaxLng);
-  const bbox=`${s},${w},${n},${e2}`;
+  const bbox=`${Math.max(lat-pad,SK[0])},${Math.max(lng-pad,SK[1])},${Math.min(lat+pad,SK[2])},${Math.min(lng+pad,SK[3])}`;
   const q=`[out:json][timeout:15];(node["highway"="bus_stop"](${bbox});node["amenity"="bus_station"](${bbox}););out body;`;
-  overpassGet(q, data=>{
-    let added=0;
-    data.elements.forEach(el=>{
-      if(!el.lat||!el.lon||added>=200)return;
-      // Double-check within SK bounds
-      if(el.lat<skMinLat||el.lat>skMaxLat||el.lon<skMinLng||el.lon>skMaxLng)return;
-      const name=el.tags.name||el.tags['name:sk']||'–';
-      const op=el.tags.operator||el.tags.network||'';
-      if(_td_buses.find(b=>Math.abs(b.lat-el.lat)<0.00005))return;
-      _td_buses.push({name,lat:el.lat,lon:el.lon,op});
-      if(map.hasLayer(busL)){
-        L.marker([el.lat,el.lon],{icon:busIcon})
-          .bindPopup(`<b>🚌 ${name}</b><br><span style="color:#7d8590">${op||'SAD'}</span>`)
-          .addTo(busL);
-        added++;
-      }
-    });
-    console.log('SK buses added:',added);
-  });
+  overpassGet(q,
+    data=>{
+      let added=0;
+      data.elements.forEach(el=>{
+        if(!el.lat||!el.lon||added>=200)return;
+        if(el.lat<SK[0]||el.lat>SK[2]||el.lon<SK[1]||el.lon>SK[3])return;
+        const name=el.tags.name||el.tags['name:sk']||'–';
+        const op=el.tags.operator||el.tags.network||'';
+        if(_td_buses.find(b=>Math.abs(b.lat-el.lat)<0.00005))return;
+        _td_buses.push({name,lat:el.lat,lon:el.lon,op});
+        if(map.hasLayer(busL)){
+          L.marker([el.lat,el.lon],{icon:busIcon})
+            .bindPopup(`<b>🚌 ${name}</b><br><span style="color:#7d8590">${op||'SAD'}</span>`)
+            .addTo(busL);
+          added++;
+        }
+      });
+      _busLoaded=true;
+      console.log('SK buses added:',added);
+    },
+    ()=>{ _busKey=null; console.warn('Bus load failed, will retry on next click'); }
+  );
 }
 
 function renderTransport(lat,lng){
-  const tl=document.getElementById('train-list'), bl=document.getElementById('bus-list');
+  const tl=document.getElementById('train-list');
+  const bl=document.getElementById('bus-list');
+
+  // Trains section — independent of buses
   if(!_tLoaded){
-    tl.innerHTML=`<div style="color:var(--muted);font-size:.74rem;padding:8px 0;display:flex;gap:6px"><div class="wdot"></div>Načítavam…</div>`;
-    bl.innerHTML=''; setTimeout(()=>renderTransport(lat,lng),2000); return;
+    tl.innerHTML=`<div style="color:var(--muted);font-size:.74rem;padding:8px 0;display:flex;align-items:center;gap:6px"><div class="wdot"></div>${lang==='en'?'Loading…':lang==='hu'?'Betöltés…':lang==='de'?'Lädt…':'Načítavam…'}</div>`;
+  } else if(_tFailed||_td.trains.length===0){
+    const msg={sk:'Vlaky momentálne nedostupné (Overpass API offline)',en:'Trains currently unavailable (Overpass API offline)',hu:'Vonatok jelenleg nem elérhetők',de:'Züge derzeit nicht verfügbar'};
+    tl.innerHTML=`<div style="color:var(--warn);font-size:.72rem;padding:8px 10px;background:rgba(210,153,34,.08);border-radius:6px;border:1px solid rgba(210,153,34,.2)">⚠ ${msg[lang]||msg.sk}</div>`;
+  } else {
+    const near=(arr,km)=>arr.map(s=>({...s,d:distKm(lat,lng,s.lat,s.lon)})).filter(s=>s.d<=km).sort((a,b)=>a.d-b.d);
+    const trains=near(_td.trains,100).slice(0,7);
+    const airports=near(_td.airports,400).slice(0,3);
+    const types=['R','IC','Os','Sp','Ex'],cls=['r','ic','os','os','r'];
+    let th='';
+    airports.forEach(s=>{th+=`<div class="titem" onclick="map.flyTo([${s.lat},${s.lon}],13)"><div class="tnr ic">✈</div><div class="ti"><div class="troute">${s.name}${s.iata?' ('+s.iata+')':''}</div><div class="tsub">${s.d.toFixed(0)} km</div></div></div>`;});
+    trains.forEach((s,i)=>{th+=`<div class="titem" onclick="map.flyTo([${s.lat},${s.lon}],15)"><div class="tnr ${cls[i%5]}">${types[i%5]}</div><div class="ti"><div class="troute">${s.name}</div><div class="tsub">${s.d.toFixed(1)} km · ${s.op||'ZSSK'}</div></div><div class="tdep">${fmtTime(8+i*13)}</div></div>`;});
+    if(!th) th=`<div style="color:var(--muted);font-size:.74rem;padding:6px 0">${t('trains_nearby')}: žiadna do 100 km</div>`;
+    tl.innerHTML=th;
   }
-  const near=(arr,km)=>arr.map(s=>({...s,d:distKm(lat,lng,s.lat,s.lon)})).filter(s=>s.d<=km).sort((a,b)=>a.d-b.d);
-  const trains=near(_td.trains,100).slice(0,7);
-  const airports=near(_td.airports,400).slice(0,3);
-  const buses=near(_td_buses,15).slice(0,8);
-  const types=['R','IC','Os','Sp','Ex'],cls=['r','ic','os','os','r'];
-  let th='';
-  airports.forEach(s=>{th+=`<div class="titem" onclick="map.flyTo([${s.lat},${s.lon}],13)"><div class="tnr ic">✈</div><div class="ti"><div class="troute">${s.name}${s.iata?' ('+s.iata+')':''}</div><div class="tsub">${s.d.toFixed(0)} km</div></div></div>`;});
-  trains.forEach((s,i)=>{th+=`<div class="titem" onclick="map.flyTo([${s.lat},${s.lon}],15)"><div class="tnr ${cls[i%5]}">${types[i%5]}</div><div class="ti"><div class="troute">${s.name}</div><div class="tsub">${s.d.toFixed(1)} km · ${s.op||'ZSSK'}</div></div><div class="tdep">${fmtTime(8+i*13)}</div></div>`;});
-  if(!th) th=`<div style="color:var(--muted);font-size:.74rem;padding:6px 0">${t('trains_nearby')}: žiadna</div>`;
-  tl.innerHTML=th;
-  let bh='';
-  buses.forEach((s,i)=>{const mhd=s.op&&(s.op.includes('MHD')||s.op.includes('DPB')||s.op.includes('DPO'));bh+=`<div class="titem" onclick="map.flyTo([${s.lat},${s.lon}],17)"><div class="tnr ${mhd?'r':'bus'}">🚌</div><div class="ti"><div class="troute">${s.name}</div><div class="tsub">${s.d.toFixed(2)} km${s.op?' · '+s.op:''}</div></div><div class="tdep">${fmtTime(3+i*7)}</div></div>`;});
-  if(!bh) bh=`<div style="color:var(--muted);font-size:.74rem;padding:6px 0">${t('buses_nearby')}: žiadna do 15 km</div>`;
-  bl.innerHTML=bh;
+
+  // Buses section — independent of trains
+  if(!_busLoaded&&_busKey){
+    bl.innerHTML=`<div style="color:var(--muted);font-size:.74rem;padding:6px 0;display:flex;align-items:center;gap:6px"><div class="wdot"></div>${lang==='en'?'Loading buses…':lang==='hu'?'Buszok betöltése…':lang==='de'?'Busse laden…':'Načítavam zastávky…'}</div>`;
+  } else if(_td_buses.length===0&&_busKey===null){
+    const msg={sk:'Klikni na mapu pre načítanie zastávok v okolí',en:'Click map to load nearby stops',hu:'Kattints a térképre a megállók betöltéséhez',de:'Karte anklicken für Haltestellen'};
+    bl.innerHTML=`<div style="color:var(--muted);font-size:.72rem;padding:6px 0">🚌 ${msg[lang]||msg.sk}</div>`;
+  } else {
+    const near=(arr,km)=>arr.map(s=>({...s,d:distKm(lat,lng,s.lat,s.lon)})).filter(s=>s.d<=km).sort((a,b)=>a.d-b.d);
+    const buses=near(_td_buses,15).slice(0,8);
+    if(!buses.length){
+      const msg={sk:'Žiadna zastávka do 15 km',en:'No stops within 15 km',hu:'Nincs megálló 15 km-en belül',de:'Keine Haltestelle in 15 km'};
+      bl.innerHTML=`<div style="color:var(--muted);font-size:.74rem;padding:6px 0">${msg[lang]||msg.sk}</div>`;
+    } else {
+      let bh='';
+      buses.forEach((s,i)=>{
+        const mhd=s.op&&(s.op.includes('MHD')||s.op.includes('DPB')||s.op.includes('DPO'));
+        bh+=`<div class="titem" onclick="map.flyTo([${s.lat},${s.lon}],17)"><div class="tnr ${mhd?'r':'bus'}">🚌</div><div class="ti"><div class="troute">${s.name}</div><div class="tsub">${s.d.toFixed(2)} km${s.op?' · '+s.op:''}</div></div><div class="tdep">${fmtTime(3+i*7)}</div></div>`;
+      });
+      bl.innerHTML=bh;
+    }
+  }
 }
 
 // ═══════════════════════════════════════════════
